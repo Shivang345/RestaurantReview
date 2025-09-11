@@ -1,0 +1,38 @@
+# === Backend (Java Spring Boot) ===
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.iml
+*.log
+.mvn/
+.gradle/
+build/
+
+# === Frontend (React/Node) ===
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+pnpm-lock.yaml
+dist/
+build/
+
+# === IDEs & OS ===
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# === MongoDB Dumps ===
+*.bson
+dump/
+
+# === Env files ===
+.env
+.env.local
+.env.*.local

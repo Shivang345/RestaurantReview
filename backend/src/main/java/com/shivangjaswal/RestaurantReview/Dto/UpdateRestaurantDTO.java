@@ -1,0 +1,17 @@
+package com.shivangjaswal.RestaurantReview.Dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class UpdateRestaurantDTO {
+    private String name;
+    private String description;
+    private String cuisineType;
+    private String address;
+    private String city;
+    private String phoneNumber;
+}
