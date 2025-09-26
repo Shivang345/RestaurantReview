@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { LogIn, Loader2, Eye, EyeOff } from 'lucide-react';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ const Login = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const from = location.state?.from?.pathname || '/restaurants';
 
@@ -37,80 +39,100 @@ const Login = () => {
   };
 
   return (
-    <div className="container mt-5">
-      <div className="row justify-content-center">
-        <div className="col-md-6 col-lg-5">
-          <div className="card shadow">
-            <div className="card-body p-5">
-              <div className="text-center mb-4">
-                <h2 className="fw-bold text-primary">🍽️ Welcome Back</h2>
-                <p className="text-muted">Sign in to your account</p>
-              </div>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <div className="bg-white rounded-2xl shadow-xl p-8">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className="text-6xl mb-4">🍽️</div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h2>
+            <p className="text-gray-600">Sign in to your account</p>
+          </div>
 
-              {error && (
-                <div className="alert alert-danger" role="alert">
-                  {error}
-                </div>
-              )}
-
-              <form onSubmit={handleSubmit}>
-                <div className="mb-3">
-                  <label htmlFor="usernameOrEmail" className="form-label">
-                    Username or Email *
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="usernameOrEmail"
-                    name="usernameOrEmail"
-                    value={formData.usernameOrEmail}
-                    onChange={handleChange}
-                    required
-                    disabled={loading}
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <label htmlFor="password" className="form-label">
-                    Password *
-                  </label>
-                  <input
-                    type="password"
-                    className="form-control"
-                    id="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    required
-                    disabled={loading}
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="btn btn-primary w-100 mb-3"
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <>
-                      <span className="spinner-border spinner-border-sm me-2" role="status"></span>
-                      Signing In...
-                    </>
-                  ) : (
-                    'Sign In'
-                  )}
-                </button>
-              </form>
-
-              <div className="text-center">
-                <p className="mb-0">
-                  Don't have an account?{' '}
-                  <Link to="/register" className="text-primary text-decoration-none">
-                    Create one here
-                  </Link>
-                </p>
+          {/* Error Alert */}
+          {error && (
+            <div className="alert-error mb-6">
+              <div className="flex items-center space-x-2">
+                <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                <span>{error}</span>
               </div>
             </div>
+          )}
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label htmlFor="usernameOrEmail" className="block text-sm font-medium text-gray-700 mb-2">
+                Username or Email *
+              </label>
+              <input
+                type="text"
+                id="usernameOrEmail"
+                name="usernameOrEmail"
+                value={formData.usernameOrEmail}
+                onChange={handleChange}
+                required
+                disabled={loading}
+                className="form-input"
+                placeholder="Enter your username or email"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                Password *
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  disabled={loading}
+                  className="form-input pr-12"
+                  placeholder="Enter your password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full btn-primary py-3 text-lg flex items-center justify-center space-x-2"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="animate-spin" size={20} />
+                  <span>Signing In...</span>
+                </>
+              ) : (
+                <>
+                  <LogIn size={20} />
+                  <span>Sign In</span>
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* Footer */}
+          <div className="mt-8 text-center">
+            <p className="text-gray-600">
+              Don't have an account?{' '}
+              <Link to="/register" className="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200">
+                Create one here
+              </Link>
+            </p>
           </div>
         </div>
       </div>

@@ -2,18 +2,17 @@ import React, { useState, useEffect } from "react";
 import { reviewAPI } from "../services/api";
 import ReviewCard from "./ReviewCard";
 import StarRating from "./StarRAting";
+import { MessageSquare, SortAsc, Loader2, TrendingUp, Users, Award } from 'lucide-react';
 
-const ReviewList = ({
-  restaurantId,
-  currentUserEmail = "guest@example.com",
-}) => {
+const ReviewList = ({ restaurantId }) => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [sortBy, setSortBy] = useState("newest");
+  const [showSortMenu, setShowSortMenu] = useState(false);
 
   useEffect(() => {
-    fetchReviews(); // eslint-disable-next-line
+    fetchReviews();
   }, [restaurantId]);
 
   const fetchReviews = async () => {
@@ -74,199 +73,169 @@ const ReviewList = ({
         ).toFixed(1)
       : 0;
 
+  const sortOptions = [
+    { value: "newest", label: "Newest First", icon: SortAsc },
+    { value: "oldest", label: "Oldest First", icon: SortAsc },
+    { value: "highest", label: "Highest Rating", icon: TrendingUp },
+    { value: "lowest", label: "Lowest Rating", icon: TrendingUp },
+  ];
+
   if (loading) {
     return (
-      <div className="d-flex justify-content-center align-items-center py-5">
-        <div className="spinner-border text-primary me-3" role="status"></div>
-        <span className="text-muted fs-5">Loading reviews...</span>
+      <div className="bg-white rounded-xl shadow-lg p-8">
+        <div className="text-center">
+          <Loader2 className="animate-spin h-8 w-8 text-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600">Loading reviews...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="reviews-section">
-      {/* ✨ CHANGE 1: Enhanced Header Section */}
-      <div className="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
-        <div>
-          <h3 className="mb-2 fw-bold text-dark">
-            💬 Customer Reviews
-            <span className="badge bg-primary ms-2">{reviews.length}</span>
-          </h3>
+    <div className="bg-white rounded-xl shadow-lg">
+      {/* Header Section */}
+      <div className="p-8 border-b border-gray-200">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+          <div className="mb-6 lg:mb-0">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4 flex items-center">
+              <MessageSquare className="mr-3" size={32} />
+              Customer Reviews ({reviews.length})
+            </h2>
+            {reviews.length > 0 && (
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <StarRating rating={parseFloat(averageRating)} size="2rem" />
+                  <span className="text-2xl font-bold text-gray-900">{averageRating}</span>
+                  <span className="text-gray-600">out of 5</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Sort Dropdown */}
           {reviews.length > 0 && (
-            <div className="d-flex align-items-center">
-              <span className="me-3">
-                <StarRating rating={averageRating} />
-              </span>
-              <span className="fw-semibold fs-5 text-dark">
-                {averageRating}
-              </span>
-              <span className="text-muted ms-1">out of 5</span>
+            <div className="relative">
+              <button
+                onClick={() => setShowSortMenu(!showSortMenu)}
+                className="flex items-center space-x-2 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg transition-colors duration-200"
+              >
+                <SortAsc size={18} />
+                <span>Sort: {sortOptions.find(opt => opt.value === sortBy)?.label}</span>
+                <svg className="w-4 h-4 ml-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+
+              {showSortMenu && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-10">
+                  {sortOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => {
+                        setSortBy(option.value);
+                        setShowSortMenu(false);
+                      }}
+                      className={`w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2 transition-colors duration-200 ${
+                        sortBy === option.value ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
+                      }`}
+                    >
+                      <option.icon size={16} />
+                      <span>{option.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
-
-        {/* ✨ CHANGE 2: Modern Sort Dropdown */}
-        {reviews.length > 0 && (
-          <div className="dropdown">
-            <button
-              className="btn btn-outline-secondary dropdown-toggle"
-              type="button"
-              data-bs-toggle="dropdown"
-            >
-              Sort by: {sortBy.charAt(0).toUpperCase() + sortBy.slice(1)}
-            </button>
-            <ul className="dropdown-menu">
-              <li>
-                <button
-                  className={`dropdown-item ${
-                    sortBy === "newest" ? "active" : ""
-                  }`}
-                  onClick={() => setSortBy("newest")}
-                >
-                  Newest First
-                </button>
-              </li>
-              <li>
-                <button
-                  className={`dropdown-item ${
-                    sortBy === "oldest" ? "active" : ""
-                  }`}
-                  onClick={() => setSortBy("oldest")}
-                >
-                  Oldest First
-                </button>
-              </li>
-              <li>
-                <button
-                  className={`dropdown-item ${
-                    sortBy === "highest" ? "active" : ""
-                  }`}
-                  onClick={() => setSortBy("highest")}
-                >
-                  Highest Rating
-                </button>
-              </li>
-              <li>
-                <button
-                  className={`dropdown-item ${
-                    sortBy === "lowest" ? "active" : ""
-                  }`}
-                  onClick={() => setSortBy("lowest")}
-                >
-                  Lowest Rating
-                </button>
-              </li>
-            </ul>
-          </div>
-        )}
       </div>
 
-      {/* ✨ CHANGE 3: Better Error Display */}
+      {/* Error Display */}
       {error && (
-        <div
-          className="alert alert-danger d-flex align-items-center mb-4"
-          role="alert"
-        >
-          <span className="me-2">⚠️</span>
-          <div>{error}</div>
+        <div className="p-8">
+          <div className="alert-error">
+            <span>{error}</span>
+          </div>
         </div>
       )}
 
-      {/* ✨ CHANGE 4: Enhanced Empty State */}
+      {/* Empty State */}
       {reviews.length === 0 ? (
-        <div className="text-center py-5">
-          <div className="mb-4" style={{ fontSize: "4rem" }}>
-            📝
-          </div>
-          <h4 className="mb-3 text-muted">No reviews yet</h4>
-          <p className="text-muted mb-4 fs-5">
+        <div className="text-center py-16">
+          <div className="text-6xl mb-6">📝</div>
+          <h3 className="text-2xl font-semibold text-gray-900 mb-4">No reviews yet</h3>
+          <p className="text-gray-600 mb-8 max-w-md mx-auto">
             Be the first to share your experience at this restaurant!
           </p>
-          <div className="bg-light p-4 rounded-3 border">
-            <p className="mb-0 text-muted">
-              <strong>💡 Tip:</strong> Your honest review helps other food
-              lovers discover great dining experiences!
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 max-w-md mx-auto">
+            <p className="text-blue-800">
+              <strong>💡 Tip:</strong> Your honest review helps other food lovers discover great dining experiences!
             </p>
           </div>
         </div>
       ) : (
-        /* ✨ CHANGE 5: Cleaner Review Cards Layout */
-        <div className="row g-4">
-          {sortedReviews.map((review) => (
-            <div key={review.id} className="col-12">
-              <div className="review-card-wrapper">
-                <ReviewCard
-                  review={review}
-                  restaurantId={restaurantId}
-                  onReviewUpdated={handleReviewUpdated}
-                  onReviewDeleted={handleReviewDeleted}
-                  currentUserEmail={currentUserEmail}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+        <div className="p-8">
+          {/* Review Cards */}
+          <div className="space-y-6">
+            {sortedReviews.map((review) => (
+              <ReviewCard
+                key={review.id}
+                review={review}
+                restaurantId={restaurantId}
+                onReviewUpdated={handleReviewUpdated}
+                onReviewDeleted={handleReviewDeleted}
+              />
+            ))}
+          </div>
 
-      {/* ✨ CHANGE 6: Review Statistics Footer */}
-      {reviews.length > 0 && (
-        <div className="mt-4 pt-4 border-top">
-          <div className="row text-center">
-            <div className="col-md-3">
-              <div className="card bg-light border-0">
-                <div className="card-body">
-                  <h5 className="card-title text-primary mb-2">
-                    {reviews.length}
-                  </h5>
-                  <p className="card-text text-muted small mb-0">
-                    Total Reviews
-                  </p>
+          {/* Statistics Footer */}
+          <div className="mt-12 pt-8 border-t border-gray-200">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="text-2xl font-bold text-gray-900 mb-1">{reviews.length}</div>
+                <div className="text-sm text-gray-600 flex items-center justify-center">
+                  <MessageSquare size={16} className="mr-1" />
+                  Total Reviews
                 </div>
               </div>
-            </div>
-            <div className="col-md-3">
-              <div className="card bg-light border-0">
-                <div className="card-body">
-                  <h5 className="card-title text-warning mb-2">
-                    {averageRating}
-                  </h5>
-                  <p className="card-text text-muted small mb-0">
-                    Average Rating
-                  </p>
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="text-2xl font-bold text-gray-900 mb-1">{averageRating}</div>
+                <div className="text-sm text-gray-600 flex items-center justify-center">
+                  <StarRating size={16} className="mr-1" />
+                  Average Rating
                 </div>
               </div>
-            </div>
-            <div className="col-md-3">
-              <div className="card bg-light border-0">
-                <div className="card-body">
-                  <h5 className="card-title text-success mb-2">
-                    {Math.round(
-                      (reviews.filter((r) => r.rating >= 4).length /
-                        reviews.length) *
-                        100
-                    )}
-                    %
-                  </h5>
-                  <p className="card-text text-muted small mb-0">
-                    Positive Reviews
-                  </p>
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="text-2xl font-bold text-gray-900 mb-1">
+                  {Math.round(
+                    (reviews.filter((r) => r.rating >= 4).length / reviews.length) * 100
+                  )}%
+                </div>
+                <div className="text-sm text-gray-600 flex items-center justify-center">
+                  <TrendingUp size={16} className="mr-1" />
+                  Positive Reviews
                 </div>
               </div>
-            </div>
-            <div className="col-md-3">
-              <div className="card bg-light border-0">
-                <div className="card-body">
-                  <h5 className="card-title text-info mb-2">
-                    {Math.max(...reviews.map((r) => r.rating))}⭐
-                  </h5>
-                  <p className="card-text text-muted small mb-0">
-                    Highest Rating
-                  </p>
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="text-2xl font-bold text-gray-900 mb-1">
+                  {Math.max(...reviews.map((r) => r.rating))}⭐
+                </div>
+                <div className="text-sm text-gray-600 flex items-center justify-center">
+                  <Award size={16} className="mr-1" />
+                  Highest Rating
                 </div>
               </div>
             </div>
           </div>
         </div>
+      )}
+
+      {/* Click outside to close sort menu */}
+      {showSortMenu && (
+        <div 
+          className="fixed inset-0 z-5" 
+          onClick={() => setShowSortMenu(false)}
+        ></div>
       )}
     </div>
   );

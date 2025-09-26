@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { restaurantAPI } from "../services/api";
 import StarRating from "./StarRAting";
+import { Search, Filter, MapPin, Phone, Eye, Edit, Trash2, Plus, Loader2 } from 'lucide-react';
 
 const RestaurantList = () => {
   const [restaurants, setRestaurants] = useState([]);
@@ -12,7 +13,7 @@ const RestaurantList = () => {
 
   const cuisineTypes = [
     "Italian",
-    "Chinese",
+    "Chinese", 
     "Indian",
     "Mexican",
     "American"
@@ -42,6 +43,7 @@ const RestaurantList = () => {
       fetchRestaurants();
       return;
     }
+
     try {
       setLoading(true);
       setError("");
@@ -61,6 +63,7 @@ const RestaurantList = () => {
       fetchRestaurants();
       return;
     }
+
     try {
       setLoading(true);
       setError("");
@@ -79,10 +82,10 @@ const RestaurantList = () => {
       try {
         await restaurantAPI.deleteRestaurant(id);
         setRestaurants(restaurants.filter((r) => r.id !== id));
-        // Show a Bootstrap toast or alert here instead of alert()
+        // Success notification would go here
         alert("Restaurant deleted successfully!");
       } catch (error) {
-        console.error("Error deleting restaurants:", error);
+        console.error("Error deleting restaurant:", error);
         alert("Failed to delete restaurant. Please try again.");
       }
     }
@@ -90,46 +93,57 @@ const RestaurantList = () => {
 
   if (loading) {
     return (
-      <div className="d-flex justify-content-center align-items-center my-5">
-        <div className="spinner-border text-warning" role="status" />
-        <span className="ms-3 text-muted">Loading restaurants...</span>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="animate-spin h-12 w-12 text-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600 text-lg">Loading restaurants...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container my-4">
-      {/* Search and filter section */}
-      <form onSubmit={handleSearch} className="mb-4">
-        <div className="row g-3">
-          <div className="col-md-8 d-flex align-items-center">
-            <input
-              type="search"
-              className="form-control me-2"
-              placeholder="Search restaurants by name, cuisine, or location"
-              aria-label="Search restaurants"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <button type="submit" className="btn btn-warning me-2">
-              Search
-            </button>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">Discover Restaurants</h1>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            Find the perfect dining experience from our curated collection of restaurants
+          </p>
+        </div>
+
+        {/* Search and Filter Section */}
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+          <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1 relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="search"
+                className="form-input pl-10"
+                placeholder="Search restaurants by name, cuisine, or location"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
             <button
-              type="button"
-              className="btn btn-outline-secondary"
-              onClick={() => {
-                setSearchTerm("");
-                setSelectedCuisine("");
-                fetchRestaurants();
-              }}
+              type="submit"
+              className="btn-primary px-6 py-2 flex items-center space-x-2"
             >
-              Clear
+              <Search size={18} />
+              <span>Search</span>
             </button>
-          </div>
-          <div className="col-md-4">
+          </form>
+
+          <div className="mt-4 flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <Filter className="h-5 w-5 text-gray-400" />
+              <label className="text-sm font-medium text-gray-700">Filter by cuisine:</label>
+            </div>
             <select
-              className="form-select"
-              aria-label="Filter by cuisine"
+              className="form-select max-w-xs"
               value={selectedCuisine}
               onChange={(e) => handleCuisineFilter(e.target.value)}
             >
@@ -142,98 +156,120 @@ const RestaurantList = () => {
             </select>
           </div>
         </div>
-      </form>
 
-      {/* Error message */}
-      {error && <div className="alert alert-danger">{error}</div>}
+        {/* Error Message */}
+        {error && (
+          <div className="alert-error mb-8">
+            <div className="flex items-center space-x-2">
+              <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              <span>{error}</span>
+            </div>
+          </div>
+        )}
 
-      {/* Result count */}
-      <p className="text-muted my-3">
-        {restaurants.length} restaurant{restaurants.length !== 1 ? "s" : ""}{" "}
-        found
-      </p>
-
-      {/* Restaurants grid */}
-      {restaurants.length === 0 ? (
-        <div className="text-center my-5">
-          <h4>No restaurants found</h4>
-          <p className="mb-3">Be the first to add a restaurant!</p>
-          <Link to="/restaurants/add" className="btn btn-success">
-            Add Restaurant
-          </Link>
+        {/* Results Count */}
+        <div className="mb-6">
+          <p className="text-gray-600">
+            <span className="font-semibold text-gray-900">{restaurants.length}</span>{" "}
+            restaurant{restaurants.length !== 1 ? "s" : ""} found
+          </p>
         </div>
-      ) : (
-        <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-          {restaurants.map((restaurant) => (
-            <div key={restaurant.id} className="col">
+
+        {/* Restaurants Grid */}
+        {restaurants.length === 0 ? (
+          <div className="text-center py-20">
+            <div className="text-6xl mb-6">🔍</div>
+            <h3 className="text-2xl font-semibold text-gray-900 mb-4">No restaurants found</h3>
+            <p className="text-gray-600 mb-8 max-w-md mx-auto">
+              We couldn't find any restaurants matching your search. Try adjusting your filters or search terms.
+            </p>
+            <Link
+              to="/add-restaurant"
+              className="btn-success inline-flex items-center space-x-2"
+            >
+              <Plus size={20} />
+              <span>Add Restaurant</span>
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+            {restaurants.map((restaurant) => (
               <div
-                className="card h-100 shadow-sm cursor-pointer"
-                role="button"
-                tabIndex={0}
-                onClick={() =>
-                  (window.location = `/restaurants/${restaurant.id}`)
-                }
-                onKeyDown={(e) =>
-                  e.key === "Enter" &&
-                  (window.location = `/restaurants/${restaurant.id}`)
-                }
+                key={restaurant.id}
+                className="card card-hover restaurant-card cursor-pointer"
+                onClick={() => window.location.href = `/restaurants/${restaurant.id}`}
               >
-                <div className="card-body d-flex flex-column">
-                  <h5 className="card-title">{restaurant.name}</h5>
-                  <div className="mb-2 d-inline-block">
-                    <span className="badge bg-secondary">
+                <div className="p-6">
+                  <div className="flex justify-between items-start mb-4">
+                    <h3 className="text-xl font-semibold text-gray-900 line-clamp-2">
+                      {restaurant.name}
+                    </h3>
+                    <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-1 rounded-full">
                       {restaurant.cuisineType}
                     </span>
                   </div>
-                  <p className="mb-1 text-muted">
-                    📍 {restaurant.address}, {restaurant.city}
-                  </p>
-                  {restaurant.phoneNumber && (
-                    <p className="mb-2 text-muted">
-                      📞 {restaurant.phoneNumber}
-                    </p>
-                  )}
-                  <div className="d-flex justify-content-between align-items-center mt-auto">
-                    <StarRating rating={restaurant.averageRating} />
-                    <div className="text-end">
-                      <p className="mb-0 fw-bold fs-5">
-                        {restaurant.averageRating.toFixed(1)}
-                      </p>
-                      <small className="text-muted">
-                        {restaurant.totalReviews} review
-                        {restaurant.totalReviews !== 1 && "s"}
-                      </small>
+
+                  <div className="space-y-3 mb-6">
+                    <div className="flex items-center text-gray-600">
+                      <MapPin size={16} className="mr-2" />
+                      <span className="text-sm">{restaurant.address}, {restaurant.city}</span>
                     </div>
+                    {restaurant.phoneNumber && (
+                      <div className="flex items-center text-gray-600">
+                        <Phone size={16} className="mr-2" />
+                        <span className="text-sm">{restaurant.phoneNumber}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center space-x-2">
+                      <StarRating rating={restaurant.averageRating} size="1.25rem" />
+                      <span className="font-semibold text-gray-900">
+                        {restaurant.averageRating.toFixed(1)}
+                      </span>
+                    </div>
+                    <span className="text-sm text-gray-600">
+                      {restaurant.totalReviews} review{restaurant.totalReviews !== 1 && "s"}
+                    </span>
+                  </div>
+
+                  <div className="flex space-x-2">
+                    <Link
+                      to={`/restaurants/${restaurant.id}`}
+                      className="btn-primary flex-1 text-center py-2 px-4 text-sm flex items-center justify-center space-x-1"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Eye size={16} />
+                      <span>View</span>
+                    </Link>
+                    <Link
+                      to={`/restaurants/edit/${restaurant.id}`}
+                      className="btn-outline flex-1 text-center py-2 px-4 text-sm flex items-center justify-center space-x-1"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Edit size={16} />
+                      <span>Edit</span>
+                    </Link>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(restaurant.id, restaurant.name);
+                      }}
+                      className="btn-danger py-2 px-4 text-sm flex items-center justify-center space-x-1"
+                    >
+                      <Trash2 size={16} />
+                      <span>Delete</span>
+                    </button>
                   </div>
                 </div>
-                <div className="card-footer d-flex gap-2">
-                  <Link
-                    to={`/restaurants/${restaurant.id}`}
-                    className="btn btn-primary btn-sm flex-fill"
-                  >
-                    View
-                  </Link>
-                  <Link
-                    to={`/restaurants/edit/${restaurant.id}`}
-                    className="btn btn-outline-secondary btn-sm flex-fill"
-                  >
-                    Edit
-                  </Link>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(restaurant.id, restaurant.name);
-                    }}
-                    className="btn btn-outline-danger btn-sm flex-fill"
-                  >
-                    Delete
-                  </button>
-                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
