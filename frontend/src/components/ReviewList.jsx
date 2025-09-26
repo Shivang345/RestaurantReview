@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { reviewAPI } from "../services/api";
 import ReviewCard from "./ReviewCard";
 import StarRating from "./StarRAting";
-import { MessageSquare, SortAsc, Loader2, TrendingUp, Users, Award } from 'lucide-react';
+import { MessageSquare, SortAsc, Loader2, Star, TrendingUp, Award } from 'lucide-react';
 
 const ReviewList = ({ restaurantId }) => {
   const [reviews, setReviews] = useState([]);
@@ -201,7 +201,7 @@ const ReviewList = ({ restaurantId }) => {
               <div className="bg-gray-50 rounded-lg p-4">
                 <div className="text-2xl font-bold text-gray-900 mb-1">{averageRating}</div>
                 <div className="text-sm text-gray-600 flex items-center justify-center">
-                  <StarRating size={16} className="mr-1" />
+                  <Star size={16} className="mr-1" />
                   Average Rating
                 </div>
               </div>

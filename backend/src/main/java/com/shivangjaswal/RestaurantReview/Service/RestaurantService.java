@@ -58,17 +58,17 @@ public class RestaurantService {
     }
 
     // READ - Search restaurants
-//    public List<RestaurantDTO> searchRestaurants(String searchTerm) {
-//        List<Restaurant> restaurants;
-//        if (searchTerm == null || searchTerm.trim().isEmpty()) {
-//            restaurants = restaurantRepository.findAll();
-//        } else {
-//            restaurants = restaurantRepository.searchRestaurants(searchTerm);
-//        }
-//        return restaurants.stream()
-//                .map(this::convertToDTO)
-//                .collect(Collectors.toList());
-//    }
+    public List<RestaurantDTO> searchRestaurants(String searchTerm) {
+        List<Restaurant> restaurants;
+        if (searchTerm == null || searchTerm.trim().isEmpty()) {
+            restaurants = restaurantRepository.findAll();
+        } else {
+            restaurants = restaurantRepository.searchRestaurants(searchTerm);
+        }
+        return restaurants.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
 
     // READ - Filter by cuisine
     public List<RestaurantDTO> getRestaurantsByCuisine(String cuisineType) {
@@ -77,14 +77,6 @@ public class RestaurantService {
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
-
-    // READ - Filter by city
-//    public List<RestaurantDTO> getRestaurantsByCity(String city) {
-//        List<Restaurant> restaurants = restaurantRepository.findByCityIgnoreCase(city);
-//        return restaurants.stream()
-//                .map(this::convertToDTO)
-//                .collect(Collectors.toList());
-//    }
 
     // UPDATE
     public RestaurantDTO updateRestaurant(String id, UpdateRestaurantDTO updateDTO) {

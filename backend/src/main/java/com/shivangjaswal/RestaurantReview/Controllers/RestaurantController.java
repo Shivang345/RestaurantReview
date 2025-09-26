@@ -51,11 +51,11 @@ public class RestaurantController {
     }
 
     // READ - Search restaurants
-//    @GetMapping("/search")
-//    public ResponseEntity<List<RestaurantDTO>> searchRestaurants(@RequestParam(required = false) String q) {
-//        List<RestaurantDTO> restaurants = restaurantService.searchRestaurants(q);
-//        return ResponseEntity.ok(restaurants);
-//    }
+    @GetMapping("/search")
+    public ResponseEntity<List<RestaurantDTO>> searchRestaurants(@RequestParam(required = false) String q) {
+        List<RestaurantDTO> restaurants = restaurantService.searchRestaurants(q);
+        return ResponseEntity.ok(restaurants);
+    }
 
     // READ - Filter by cuisine
     @GetMapping("/cuisine/{cuisineType}")
@@ -63,13 +63,6 @@ public class RestaurantController {
         List<RestaurantDTO> restaurants = restaurantService.getRestaurantsByCuisine(cuisineType);
         return ResponseEntity.ok(restaurants);
     }
-
-    // READ - Filter by city
-//    @GetMapping("/city/{city}")
-//    public ResponseEntity<List<RestaurantDTO>> getRestaurantsByCity(@PathVariable String city) {
-//        List<RestaurantDTO> restaurants = restaurantService.getRestaurantsByCity(city);
-//        return ResponseEntity.ok(restaurants);
-//    }
 
     // UPDATE - Update restaurant
     @PutMapping("/{id}")
