@@ -15,7 +15,7 @@ const RestaurantDetail = () => {
   const currentUserEmail = "guest@example.com";
 
   useEffect(() => {
-    fetchRestaurant();
+    fetchRestaurant(); // eslint-disable-next-line
   }, [id]);
 
   const fetchRestaurant = async () => {

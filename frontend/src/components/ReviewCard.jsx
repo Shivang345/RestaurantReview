@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { reviewAPI } from "../services/api";
+import { useAuth } from "../contexts/AuthContext";
 import StarRating from "./StarRAting";
 
 const ReviewCard = ({
@@ -7,8 +8,8 @@ const ReviewCard = ({
   restaurantId,
   onReviewUpdated,
   onReviewDeleted,
-  currentUserEmail,
 }) => {
+  const { user, isAuthenticated } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({
     content: review.content,
@@ -16,8 +17,9 @@ const ReviewCard = ({
   });
   const [loading, setLoading] = useState(false);
 
-  const isOwner =
-    currentUserEmail && review.userEmail.toLowerCase() === currentUserEmail.toLowerCase();
+  // Check if current user owns this review
+  const isOwner = isAuthenticated && user && 
+    review.userEmail.toLowerCase() === user.email.toLowerCase();
   const canEdit = isOwner && review.canBeEdited;
 
   const handleEdit = async () => {
@@ -26,12 +28,11 @@ const ReviewCard = ({
       const response = await reviewAPI.updateReview(
         restaurantId,
         review.id,
-        editData,
-        currentUserEmail
+        editData
       );
       onReviewUpdated(response.data);
       setIsEditing(false);
-
+      
       // Success notification
       const notification = document.createElement("div");
       notification.className =
@@ -51,9 +52,9 @@ const ReviewCard = ({
     if (window.confirm("Are you sure you want to delete this review?")) {
       try {
         setLoading(true);
-        await reviewAPI.deleteReview(restaurantId, review.id, currentUserEmail);
+        await reviewAPI.deleteReview(restaurantId, review.id);
         onReviewDeleted(review.id);
-
+        
         // Success notification
         const notification = document.createElement("div");
         notification.className =
@@ -71,59 +72,89 @@ const ReviewCard = ({
   };
 
   const formatDate = (dateString) => {
-    const options = { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" };
+    const options = { 
+      year: "numeric", 
+      month: "short", 
+      day: "numeric", 
+      hour: "2-digit", 
+      minute: "2-digit" 
+    };
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
   return (
     <div
       className="card shadow-sm review-card"
-      style={{ borderRadius: "12px", cursor: "default", transition: "transform 0.2s ease, box-shadow 0.2s ease" }}
+      style={{ 
+        borderRadius: "12px", 
+        cursor: "default", 
+        transition: "transform 0.2s ease, box-shadow 0.2s ease" 
+      }}
     >
       <div className="card-body">
-        {/* Header */}
-        <div className="d-flex justify-content-between align-items-center mb-2">
-          <div className="m-auto">
-            <strong>{review.username}</strong>
-            <div className="text-muted small">
-              {formatDate(review.createdAt)}
-              {review.lastEdited && review.lastEdited !== review.createdAt && (
-                <em className="ms-2">(edited {formatDate(review.lastEdited)})</em>
-              )}
+        {/* Header - Updated layout */}
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          {/* Centered name and date */}
+          <div className="text-center flex-grow-1">
+            <div>
+              <strong className="d-block">{review.username}</strong>
+              <small className="text-muted">
+                {formatDate(review.createdAt)}
+                {review.lastEdited && review.lastEdited !== review.createdAt && (
+                  <em> (edited {formatDate(review.lastEdited)})</em>
+                )}
+              </small>
             </div>
           </div>
-
+          
+          {/* Three-dot menu positioned absolutely */}
           {isOwner && (
-            <div>
-              {canEdit && !isEditing && (
-                <button
-                  className="btn btn-sm btn-outline-primary me-2"
-                  onClick={() => setIsEditing(true)}
-                >
-                  ✏️ Edit
-                </button>
-              )}
+            <div className="dropdown position-relative" style={{ marginLeft: "auto", zIndex: 1 }}>
               <button
-                className="btn btn-sm btn-outline-danger"
-                onClick={handleDelete}
-                disabled={loading}
+                className="btn btn-link btn-sm text-muted border-0"
+                type="button"
+                data-bs-toggle="dropdown"
+                style={{ marginTop: "-8px" }}
               >
-                🗑️ Delete
+                ⋮
               </button>
+              <ul className="dropdown-menu dropdown-menu-end">
+                {canEdit && !isEditing && (
+                  <li>
+                    <button
+                      className="dropdown-item"
+                      onClick={() => setIsEditing(true)}
+                    >
+                      Edit
+                    </button>
+                  </li>
+                )}
+                <li>
+                  <button
+                    className="dropdown-item text-danger"
+                    onClick={handleDelete}
+                  >
+                    Delete
+                  </button>
+                </li>
+              </ul>
             </div>
           )}
         </div>
 
-        {/* Rating */}
-        <div className="mb-2">
-          <StarRating rating={isEditing ? editData.rating : review.rating} editable={isEditing} onChange={(val) => setEditData({ ...editData, rating: val })} size="1.5rem" />
+        {/* Rating - Centered */}
+        <div className="mb-3 text-center">
+          <StarRating 
+            rating={isEditing ? editData.rating : review.rating} 
+            editable={isEditing} 
+            onChange={(val) => setEditData({ ...editData, rating: val })} 
+            size="1.5rem" 
+          />
         </div>
 
         {/* Review Content */}
         {!isEditing ? (
-          <p className="text-truncate" style={{ maxHeight: "4rem", overflow: "hidden", lineHeight: "1.2rem" }}>
-            {review.content}
-          </p>
+          <p className="card-text text-center">{review.content}</p>
         ) : (
           <textarea
             className="form-control mb-2"
@@ -136,23 +167,17 @@ const ReviewCard = ({
 
         {/* Editing Buttons */}
         {isEditing && (
-          <div className="d-flex justify-content-end gap-2">
+          <div className="d-flex gap-2 justify-content-center">
             <button
-              className="btn btn-sm btn-success"
+              className="btn btn-primary btn-sm"
               onClick={handleEdit}
               disabled={loading}
             >
               Save
             </button>
             <button
-              className="btn btn-sm btn-secondary"
-              onClick={() => {
-                setIsEditing(false);
-                setEditData({
-                  content: review.content,
-                  rating: review.rating,
-                });
-              }}
+              className="btn btn-secondary btn-sm"
+              onClick={() => setIsEditing(false)}
               disabled={loading}
             >
               Cancel
@@ -162,7 +187,7 @@ const ReviewCard = ({
 
         {/* Edit time warning */}
         {!isEditing && isOwner && !canEdit && (
-          <small className="text-warning d-block mt-2">
+          <small className="text-muted d-block text-center mt-2">
             ⏰ You can edit your review within 48 hours of posting.
           </small>
         )}

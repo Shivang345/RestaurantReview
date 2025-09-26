@@ -29,11 +29,9 @@ public class Restaurant {
     private String city;
     private String phoneNumber;
 
-    // Rating fields - calculated from reviews
     private Double averageRating = 0.0;
     private Integer totalReviews = 0;
 
-    // Embedded reviews
     @Builder.Default
     private List<Review> reviews = new ArrayList<>();
 

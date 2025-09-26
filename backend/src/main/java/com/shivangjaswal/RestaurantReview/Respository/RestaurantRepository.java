@@ -17,11 +17,11 @@ public interface RestaurantRepository extends MongoRepository<Restaurant, String
     List<Restaurant> findByAverageRatingGreaterThanEqual(Double rating);
 
     // Custom query for search
-    @Query("{ $or: [ " +
-            "{ 'name': { $regex: ?0, $options: 'i' } }, " +
-            "{ 'description': { $regex: ?0, $options: 'i' } }, " +
-            "{ 'cuisineType': { $regex: ?0, $options: 'i' } } " +
-            "] }")
-    List<Restaurant> searchRestaurants(String searchTerm);
+//    @Query("{ $or: [ " +
+//            "{ 'name': { $regex: ?0, $options: 'i' } }, " +
+//            "{ 'description': { $regex: ?0, $options: 'i' } }, " +
+//            "{ 'cuisineType': { $regex: ?0, $options: 'i' } } " +
+//            "] }")
+//    List<Restaurant> searchRestaurants(String searchTerm);
 }
 

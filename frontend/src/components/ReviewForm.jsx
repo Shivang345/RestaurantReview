@@ -1,18 +1,16 @@
 import React, { useState } from "react";
 import { reviewAPI } from "../services/api";
+import { useAuth } from "../contexts/AuthContext";
 
 const ReviewForm = ({
   restaurantId,
-  onReviewSubmitted,
-  currentUserEmail = "guest@example.com",
+  onReviewSubmitted
 }) => {
+  const { user, isAuthenticated } = useAuth();
   const [formData, setFormData] = useState({
-    username: "",
-    userEmail: "",
     content: "",
     rating: 5,
   });
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -27,8 +25,14 @@ const ReviewForm = ({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.username.trim() || !formData.content.trim()) {
-      setError("Please fill all required fields");
+    
+    if (!isAuthenticated) {
+      setError("Please sign in to write a review");
+      return;
+    }
+
+    if (!formData.content.trim()) {
+      setError("Please write a review");
       return;
     }
 
@@ -37,7 +41,7 @@ const ReviewForm = ({
       setError("");
       await reviewAPI.createReview(restaurantId, formData);
       onReviewSubmitted();
-      setFormData({ username: "", userEmail: "", content: "", rating: 5 });
+      setFormData({ content: "", rating: 5 });
     } catch {
       setError("Submission failed, please try again.");
     } finally {
@@ -45,8 +49,15 @@ const ReviewForm = ({
     }
   };
 
-  // Simple star rating with bootstrap btn classes
-  // Bootstrap star rating with hover and click
+  if (!isAuthenticated) {
+    return (
+      <div className="alert alert-info">
+        <h5>Want to write a review?</h5>
+        <p>Please <a href="/login" className="alert-link">sign in</a> or <a href="/register" className="alert-link">create an account</a> to share your experience.</p>
+      </div>
+    );
+  }
+
   const StarRating = ({ rating, onChange }) => {
     const [hover, setHover] = useState(0);
 
@@ -84,50 +95,22 @@ const ReviewForm = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="border rounded p-4 mb-4 bg-white">
+    <form onSubmit={handleSubmit} className="bg-light p-4 rounded">
       {error && <div className="alert alert-danger">{error}</div>}
-
+      
       <div className="mb-3">
-        <label htmlFor="username" className="form-label">
-          Your Name <span className="text-danger">*</span>
+        <label className="form-label">
+          <strong>Writing as: {user.fullName}</strong>
         </label>
-        <input
-          type="text"
-          id="username"
-          name="username"
-          className="form-control"
-          placeholder="Enter your name"
-          value={formData.username}
-          onChange={handleChange}
-          required
-        />
       </div>
 
       <div className="mb-3">
-        <label htmlFor="userEmail" className="form-label">
-          Your Email <span className="text-danger">*</span>
-        </label>
-        <input
-          type="email"
-          id="userEmail"
-          name="userEmail"
-          className="form-control"
-          placeholder="Enter your email"
-          value={formData.userEmail}
-          onChange={handleChange}
-          required
-        />
+        <label className="form-label">Rating *</label>
+        <StarRating rating={formData.rating} onChange={handleRatingChange} />
       </div>
 
-      <label className="form-label">
-        Rating <span className="text-danger">*</span>
-      </label>
-      <StarRating rating={formData.rating} onChange={handleRatingChange} />
-
       <div className="mb-3">
-        <label htmlFor="content" className="form-label">
-          Review <span className="text-danger">*</span>
-        </label>
+        <label htmlFor="content" className="form-label">Review *</label>
         <textarea
           id="content"
           name="content"
@@ -142,10 +125,17 @@ const ReviewForm = ({
 
       <button
         type="submit"
-        className="btn btn-success w-100"
+        className="btn btn-primary"
         disabled={loading}
       >
-        {loading ? "Submitting..." : "Submit Review"}
+        {loading ? (
+          <>
+            <span className="spinner-border spinner-border-sm me-2" role="status"></span>
+            Submitting...
+          </>
+        ) : (
+          'Submit Review'
+        )}
       </button>
     </form>
   );

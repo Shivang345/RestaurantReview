@@ -24,14 +24,12 @@ public class Review {
     @Id
     private String id;
 
-    // User info (simplified - you can enhance with User entity later)
     @NotBlank(message = "Username is required")
     private String username;
 
     @NotBlank(message = "User email is required")
     private String userEmail;
 
-    // Review content
     @NotBlank(message = "Review content is required")
     private String content;
 
@@ -40,11 +38,9 @@ public class Review {
     @Max(value = 5, message = "Rating cannot exceed 5")
     private Integer rating;
 
-    // Photo URLs (for future image upload feature)
     @Builder.Default
     private List<String> photoUrls = new ArrayList<>();
 
-    // Timestamps
     @CreatedDate
     private LocalDateTime createdAt;
 

@@ -1,20 +1,27 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 const Navbar = () => {
   const [isCollapsed, setIsCollapsed] = useState(true);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout, isAuthenticated } = useAuth();
 
-  // To highlight active link
   const isActive = (path) => location.pathname === path;
 
   const toggleNavbar = () => {
     setIsCollapsed(!isCollapsed);
   };
 
-  // Close menu on link click
   const handleLinkClick = () => {
     if (!isCollapsed) setIsCollapsed(true);
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+    handleLinkClick();
   };
 
   return (
@@ -23,20 +30,19 @@ const Navbar = () => {
         <Link className="navbar-brand fw-bold" to="/" onClick={handleLinkClick}>
           🍽️ Restaurant Reviews
         </Link>
-
+        
         <button
           className="navbar-toggler"
           type="button"
-          aria-controls="navbarNav"
+          onClick={toggleNavbar}
           aria-expanded={!isCollapsed}
           aria-label="Toggle navigation"
-          onClick={toggleNavbar}
         >
           <span className="navbar-toggler-icon"></span>
         </button>
 
-        <div className={`collapse navbar-collapse ${!isCollapsed ? 'show' : ''}`} id="navbarNav">
-          <ul className="navbar-nav ms-auto">
+        <div className={`collapse navbar-collapse ${!isCollapsed ? 'show' : ''}`}>
+          <ul className="navbar-nav me-auto">
             <li className="nav-item">
               <Link
                 className={`nav-link ${isActive('/') ? 'active' : ''}`}
@@ -57,13 +63,61 @@ const Navbar = () => {
             </li>
             <li className="nav-item">
               <Link
-                className={`nav-link ${isActive('/restaurants/add') ? 'active' : ''}`}
-                to="/restaurants/add"
+                className={`nav-link ${isActive('/add-restaurant') ? 'active' : ''}`}
+                to="/add-restaurant"
                 onClick={handleLinkClick}
               >
                 Add Restaurant
               </Link>
             </li>
+          </ul>
+
+          <ul className="navbar-nav">
+            {isAuthenticated ? (
+              <>
+                <li className="nav-item dropdown">
+                  <a
+                    className="nav-link dropdown-toggle"
+                    href="#"
+                    role="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                  >
+                    👤 {user.fullName}
+                  </a>
+                  <ul className="dropdown-menu">
+                    <li><span className="dropdown-item-text">Signed in as <strong>{user.username}</strong></span></li>
+                    <li><hr className="dropdown-divider" /></li>
+                    <li>
+                      <button className="dropdown-item" onClick={handleLogout}>
+                        🚪 Sign Out
+                      </button>
+                    </li>
+                  </ul>
+                </li>
+              </>
+            ) : (
+              <>
+                <li className="nav-item">
+                  <Link
+                    className={`nav-link ${isActive('/login') ? 'active' : ''}`}
+                    to="/login"
+                    onClick={handleLinkClick}
+                  >
+                    Sign In
+                  </Link>
+                </li>
+                <li className="nav-item">
+                  <Link
+                    className={`nav-link ${isActive('/register') ? 'active' : ''}`}
+                    to="/register"
+                    onClick={handleLinkClick}
+                  >
+                    Sign Up
+                  </Link>
+                </li>
+              </>
+            )}
           </ul>
         </div>
       </div>

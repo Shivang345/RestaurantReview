@@ -45,7 +45,6 @@ public class ReviewService {
                 .userEmail(createReviewDTO.getUserEmail().toLowerCase())
                 .content(createReviewDTO.getContent())
                 .rating(createReviewDTO.getRating())
-                .photoUrls(createReviewDTO.getPhotoUrls())
                 .createdAt(LocalDateTime.now())
                 .lastEditedAt(LocalDateTime.now())
                 .build();

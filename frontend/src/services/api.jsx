@@ -9,20 +9,46 @@ const api = axios.create({
   },
 });
 
+// Add request interceptor for authentication token
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 // Add response interceptor for error handling
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    if (error.response?.status === 401) {
+      // Clear token and redirect to login
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
     console.error('API Error:', error);
     return Promise.reject(error);
   }
 );
 
+// Authentication API
+export const authAPI = {
+  register: (userData) => api.post('/auth/register', userData),
+  login: (credentials) => api.post('/auth/login', credentials),
+  logout: () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+  }
+};
+
+// Existing restaurant API (unchanged)
 export const restaurantAPI = {
-  // CREATE
   createRestaurant: (restaurant) => api.post('/restaurants', restaurant),
-  
-  // READ
   getAllRestaurants: () => api.get('/restaurants'),
   getRestaurantById: (id) => api.get(`/restaurants/${id}`),
   searchRestaurants: (searchTerm) => api.get(`/restaurants/search`, {
@@ -30,16 +56,12 @@ export const restaurantAPI = {
   }),
   getRestaurantsByCuisine: (cuisine) => api.get(`/restaurants/cuisine/${cuisine}`),
   getRestaurantsByCity: (city) => api.get(`/restaurants/city/${city}`),
-  
-  // UPDATE
   updateRestaurant: (id, restaurant) => api.put(`/restaurants/${id}`, restaurant),
-  
-  // DELETE
   deleteRestaurant: (id) => api.delete(`/restaurants/${id}`),
 };
 
+// Updated review API (removed userEmail parameters as they're now handled by backend)
 export const reviewAPI = {
-  // REVIEW CRUD
   createReview: (restaurantId, review) => 
     api.post(`/restaurants/${restaurantId}/reviews`, review),
   
@@ -49,14 +71,11 @@ export const reviewAPI = {
   getReview: (restaurantId, reviewId) => 
     api.get(`/restaurants/${restaurantId}/reviews/${reviewId}`),
   
-  updateReview: (restaurantId, reviewId, review, userEmail) => 
-    api.put(`/restaurants/${restaurantId}/reviews/${reviewId}?userEmail=${userEmail}`, review),
+  updateReview: (restaurantId, reviewId, review) => 
+    api.put(`/restaurants/${restaurantId}/reviews/${reviewId}`, review),
   
-  deleteReview: (restaurantId, reviewId, userEmail) => 
-    api.delete(`/restaurants/${restaurantId}/reviews/${reviewId}?userEmail=${userEmail}`),
-  
-  getReviewsByUser: (userEmail) => 
-    api.get(`/users/${userEmail}/reviews`),
+  deleteReview: (restaurantId, reviewId) => 
+    api.delete(`/restaurants/${restaurantId}/reviews/${reviewId}`),
 };
 
 export default api;

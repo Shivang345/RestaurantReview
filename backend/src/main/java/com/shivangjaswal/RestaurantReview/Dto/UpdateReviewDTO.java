@@ -1,6 +1,5 @@
 package com.shivangjaswal.RestaurantReview.Dto;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

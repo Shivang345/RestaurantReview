@@ -13,7 +13,7 @@ const ReviewList = ({
   const [sortBy, setSortBy] = useState("newest");
 
   useEffect(() => {
-    fetchReviews();
+    fetchReviews(); // eslint-disable-next-line
   }, [restaurantId]);
 
   const fetchReviews = async () => {
