@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { reviewAPI } from "../services/api";
 import { useAuth } from "../contexts/AuthContext";
 import StarRating from "./StarRAting";
+import PhotoGallery from "./PhotoGallery";  // Import PhotoGallery here
 import { Edit, Trash2, Save, X, MoreVertical } from 'lucide-react';
 
 const ReviewCard = ({
@@ -23,6 +24,13 @@ const ReviewCard = ({
   const isOwner = isAuthenticated && user && 
     review.userEmail.toLowerCase() === user.email.toLowerCase();
   const canEdit = isOwner && review.canBeEdited;
+
+  // Helper: prepend backend URL for photo URLs
+  const getImageUrl = (photoUrl) => {
+    if (!photoUrl) return null;
+    if (photoUrl.startsWith('http')) return photoUrl;
+    return `http://localhost:8080${photoUrl}`;
+  };
 
   const handleEdit = async () => {
     try {
@@ -176,6 +184,16 @@ const ReviewCard = ({
             placeholder="Update your review..."
           />
         </div>
+      )}
+
+      {/* Review Photos */}
+      {!isEditing && review.photoUrls && review.photoUrls.length > 0 && (
+        <PhotoGallery
+          photos={review.photoUrls.map(getImageUrl)}
+          altText={`${review.username}'s review photos`}
+          maxPreview={4}
+          showCount={true}
+        />
       )}
 
       {/* Editing Buttons */}

@@ -12,7 +12,7 @@ const ReviewList = ({ restaurantId }) => {
   const [showSortMenu, setShowSortMenu] = useState(false);
 
   useEffect(() => {
-    fetchReviews();
+    fetchReviews();  // eslint-disable-next-line
   }, [restaurantId]);
 
   const fetchReviews = async () => {
@@ -175,7 +175,7 @@ const ReviewList = ({ restaurantId }) => {
         </div>
       ) : (
         <div className="p-8">
-          {/* Review Cards */}
+          {/* Review Cards - This now includes photo display via ReviewCard */}
           <div className="space-y-6">
             {sortedReviews.map((review) => (
               <ReviewCard

@@ -11,7 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/restaurants")
@@ -74,6 +76,65 @@ public class RestaurantController {
             return ResponseEntity.ok(updatedRestaurant);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @PutMapping("/{id}/photos")
+    public ResponseEntity<Map<String, Object>> updateRestaurantPhotos(
+            @PathVariable String id,
+            @RequestBody Map<String, List<String>> request) {
+
+        System.out.println("Updating photos for restaurant: " + id);
+        System.out.println("Photo URLs: " + request.get("photoUrls"));
+
+        try {
+            List<String> photoUrls = request.get("photoUrls");
+            RestaurantDTO updatedRestaurant = restaurantService.updateRestaurantPhotos(id, photoUrls);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("photoUrls", updatedRestaurant.getPhotoUrls());
+            response.put("message", "Photos updated successfully");
+
+            System.out.println("Successfully updated restaurant photos");
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            System.err.println("Error updating restaurant photos: " + e.getMessage());
+            Map<String, Object> response = new HashMap<>();
+            response.put("error", "Failed to update photos");
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } catch (Exception e) {
+            System.err.println("Unexpected error: " + e.getMessage());
+            Map<String, Object> response = new HashMap<>();
+            response.put("error", "Internal server error");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    // DELETE - Remove a specific photo from restaurant
+    @DeleteMapping("/{id}/photos")
+    public ResponseEntity<Map<String, Object>> removeRestaurantPhoto(
+            @PathVariable String id,
+            @RequestParam String photoUrl) {
+
+        System.out.println("Removing photo from restaurant: " + id);
+        System.out.println("Photo URL to remove: " + photoUrl);
+
+        try {
+            RestaurantDTO updatedRestaurant = restaurantService.removeRestaurantPhoto(id, photoUrl);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("photoUrls", updatedRestaurant.getPhotoUrls());
+            response.put("message", "Photo removed successfully");
+
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("error", "Failed to remove photo");
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
     }
 

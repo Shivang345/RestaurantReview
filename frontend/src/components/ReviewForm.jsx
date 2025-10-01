@@ -2,12 +2,14 @@ import React, { useState } from "react";
 import { reviewAPI } from "../services/api";
 import { useAuth } from "../contexts/AuthContext";
 import { Star, Send, Loader2, LogIn } from 'lucide-react';
+import PhotoUpload from './PhotoUpload';
 
 const ReviewForm = ({ restaurantId, onReviewSubmitted }) => {
   const { user, isAuthenticated } = useAuth();
   const [formData, setFormData] = useState({
     content: "",
     rating: 5,
+    photoUrls: [],
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -19,6 +21,10 @@ const ReviewForm = ({ restaurantId, onReviewSubmitted }) => {
 
   const handleRatingChange = (value) => {
     setFormData({ ...formData, rating: value });
+  };
+
+  const handlePhotosChange = (photoUrls) => {
+    setFormData({ ...formData, photoUrls });
   };
 
   const handleSubmit = async (e) => {
@@ -39,7 +45,7 @@ const ReviewForm = ({ restaurantId, onReviewSubmitted }) => {
       setError("");
       await reviewAPI.createReview(restaurantId, formData);
       onReviewSubmitted();
-      setFormData({ content: "", rating: 5 });
+      setFormData({ content: "", rating: 5, photoUrls: [] });
     } catch {
       setError("Submission failed, please try again.");
     } finally {
@@ -138,6 +144,13 @@ const ReviewForm = ({ restaurantId, onReviewSubmitted }) => {
           disabled={loading}
         />
       </div>
+
+      <PhotoUpload
+          onPhotosChange={handlePhotosChange}
+          maxPhotos={5}
+          initialPhotos={formData.photoUrls}
+          uploadEndpoint="/api/uploads/review-photos"
+      />
 
       <button
         type="submit"

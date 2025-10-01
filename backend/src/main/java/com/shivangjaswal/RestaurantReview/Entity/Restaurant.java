@@ -40,4 +40,7 @@ public class Restaurant {
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
+
+    @Builder.Default
+    private List<String> photoUrls = new ArrayList<>();
 }

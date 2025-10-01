@@ -121,6 +121,32 @@ public class RestaurantService {
         }
     }
 
+    // Add these methods to your RestaurantService.java
+
+    public RestaurantDTO updateRestaurantPhotos(String id, List<String> photoUrls) {
+        Restaurant restaurant = restaurantRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Restaurant not found with id: " + id));
+
+        restaurant.setPhotoUrls(photoUrls);
+        Restaurant savedRestaurant = restaurantRepository.save(restaurant);
+
+        return convertToDTO(savedRestaurant);
+    }
+
+    public RestaurantDTO removeRestaurantPhoto(String id, String photoUrl) {
+        Restaurant restaurant = restaurantRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Restaurant not found with id: " + id));
+
+        if (restaurant.getPhotoUrls() != null) {
+            restaurant.getPhotoUrls().remove(photoUrl);
+            Restaurant savedRestaurant = restaurantRepository.save(restaurant);
+            return convertToDTO(savedRestaurant);
+        }
+
+        throw new RuntimeException("No photos found for restaurant");
+    }
+
+
     // Helper method to convert entity to DTO
     private RestaurantDTO convertToDTO(Restaurant restaurant) {
         return RestaurantDTO.builder()
@@ -133,6 +159,7 @@ public class RestaurantService {
                 .phoneNumber(restaurant.getPhoneNumber())
                 .averageRating(restaurant.getAverageRating())
                 .totalReviews(restaurant.getTotalReviews())
+                .photoUrls(restaurant.getPhotoUrls())
                 .createdAt(restaurant.getCreatedAt())
                 .updatedAt(restaurant.getUpdatedAt())
                 .build();

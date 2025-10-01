@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { restaurantAPI } from "../services/api";
 import StarRating from "./StarRAting";
 import { Search, Filter, MapPin, Phone, Eye, Edit, Trash2, Plus, Loader2 } from 'lucide-react';
+import PhotoGallery from "./PhotoGallery";
 
 const RestaurantList = () => {
   const [restaurants, setRestaurants] = useState([]);
@@ -18,6 +19,13 @@ const RestaurantList = () => {
     "Mexican",
     "American"
   ];
+
+  // Helper function to get full image URL
+  const getImageUrl = (photoUrl) => {
+    if (!photoUrl) return null;
+    if (photoUrl.startsWith('http')) return photoUrl;
+    return `http://localhost:8080${photoUrl}`;
+  };
 
   useEffect(() => {
     fetchRestaurants();
@@ -82,7 +90,6 @@ const RestaurantList = () => {
       try {
         await restaurantAPI.deleteRestaurant(id);
         setRestaurants(restaurants.filter((r) => r.id !== id));
-        // Success notification would go here
         alert("Restaurant deleted successfully!");
       } catch (error) {
         console.error("Error deleting restaurant:", error);
@@ -198,27 +205,60 @@ const RestaurantList = () => {
             {restaurants.map((restaurant) => (
               <div
                 key={restaurant.id}
-                className="card card-hover restaurant-card cursor-pointer"
-                onClick={() => window.location.href = `/restaurants/${restaurant.id}`}
+                className="card card-hover restaurant-card bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
               >
+                {/* Restaurant Photo Section */}
+                {restaurant.photoUrls && restaurant.photoUrls.length > 0 && (
+                  <div className="relative h-48 overflow-hidden">
+                    <img
+                      src={getImageUrl(restaurant.photoUrls[0])}
+                      alt={restaurant.name}
+                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300 cursor-pointer"
+                      onClick={() => window.location.href = `/restaurants/${restaurant.id}`}
+                    />
+                    {restaurant.photoUrls.length > 1 && (
+                      <div className="absolute top-2 right-2 bg-black bg-opacity-60 text-white px-2 py-1 rounded-full text-xs font-medium">
+                        +{restaurant.photoUrls.length - 1} photos
+                      </div>
+                    )}
+                    {/* Cuisine type badge on image */}
+                    <div className="absolute top-2 left-2">
+                      <span className="bg-blue-500 text-white text-xs font-medium px-2.5 py-1 rounded-full">
+                        {restaurant.cuisineType}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
                 <div className="p-6">
                   <div className="flex justify-between items-start mb-4">
-                    <h3 className="text-xl font-semibold text-gray-900 line-clamp-2">
+                    <h3 className="text-xl font-semibold text-gray-900 line-clamp-2 cursor-pointer hover:text-blue-600 transition-colors"
+                        onClick={() => window.location.href = `/restaurants/${restaurant.id}`}>
                       {restaurant.name}
                     </h3>
-                    <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-1 rounded-full">
-                      {restaurant.cuisineType}
-                    </span>
+                    {/* Only show cuisine badge if no photo */}
+                    {(!restaurant.photoUrls || restaurant.photoUrls.length === 0) && (
+                      <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-1 rounded-full">
+                        {restaurant.cuisineType}
+                      </span>
+                    )}
                   </div>
+
+                  {/* Description */}
+                  {restaurant.description && (
+                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                      {restaurant.description}
+                    </p>
+                  )}
 
                   <div className="space-y-3 mb-6">
                     <div className="flex items-center text-gray-600">
-                      <MapPin size={16} className="mr-2" />
-                      <span className="text-sm">{restaurant.address}, {restaurant.city}</span>
+                      <MapPin size={16} className="mr-2 flex-shrink-0" />
+                      <span className="text-sm line-clamp-1">{restaurant.address}, {restaurant.city}</span>
                     </div>
                     {restaurant.phoneNumber && (
                       <div className="flex items-center text-gray-600">
-                        <Phone size={16} className="mr-2" />
+                        <Phone size={16} className="mr-2 flex-shrink-0" />
                         <span className="text-sm">{restaurant.phoneNumber}</span>
                       </div>
                     )}

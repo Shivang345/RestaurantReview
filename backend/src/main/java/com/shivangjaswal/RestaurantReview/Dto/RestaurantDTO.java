@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -35,4 +36,6 @@ public class RestaurantDTO {
     private Integer totalReviews;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    private List<String> photoUrls;
 }

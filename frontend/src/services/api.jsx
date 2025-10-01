@@ -58,6 +58,25 @@ export const restaurantAPI = {
   getRestaurantsByCity: (city) => api.get(`/restaurants/city/${city}`),
   updateRestaurant: (id, restaurant) => api.put(`/restaurants/${id}`, restaurant),
   deleteRestaurant: (id) => api.delete(`/restaurants/${id}`),
+
+  updateRestaurantPhotos: async (restaurantId, photoUrls) => {
+    const response = await fetch(`http://localhost:8080/api/restaurants/${restaurantId}/photos`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        // Add any auth headers if needed
+      },
+      body: JSON.stringify({ photoUrls })
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`HTTP ${response.status}: ${errorText}`);
+    }
+    
+    return await response.json();
+  },
+  
 };
 
 // Updated review API (removed userEmail parameters as they're now handled by backend)

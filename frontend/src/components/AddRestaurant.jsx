@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { restaurantAPI } from '../services/api';
 import { Save, Loader2, MapPin, Phone, FileText, Tag } from 'lucide-react';
+import PhotoUpload from './PhotoUpload';
 
 const AddRestaurant = () => {
   const navigate = useNavigate();
@@ -11,7 +12,8 @@ const AddRestaurant = () => {
     cuisineType: '',
     address: '',
     city: '',
-    phoneNumber: ''
+    phoneNumber: '',
+    photoUrls: []
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -26,13 +28,47 @@ const AddRestaurant = () => {
     if (error) setError('');
   };
 
+  const handlePhotosChange = (photoUrls) => {
+    setFormData({ ...formData, photoUrls });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       setLoading(true);
       setError('');
-      await restaurantAPI.createRestaurant(formData);
+
       
+
+      // Step 1: Create the restaurant first (without photos)
+      const restaurantData = {
+        name: formData.name,
+        description: formData.description,
+        cuisineType: formData.cuisineType,
+        address: formData.address,
+        city: formData.city,
+        phoneNumber: formData.phoneNumber
+      };
+
+      const response = await restaurantAPI.createRestaurant(restaurantData);
+      const newRestaurantId = response.data.id;
+      
+      
+
+      // Step 2: If there are photos, associate them with the restaurant
+      if (formData.photoUrls && formData.photoUrls.length > 0) {
+        
+        
+        try {
+          await restaurantAPI.updateRestaurantPhotos(newRestaurantId, formData.photoUrls);
+          
+        } catch (photoError) {
+          console.error('Failed to associate photos with restaurant:', photoError);
+          // Restaurant was created but photos failed - show warning but continue
+          alert('Restaurant created but some photos failed to upload. You can add them later.');
+        }
+      }
+
       // Success notification
       const notification = document.createElement("div");
       notification.className = "fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 notification";
@@ -190,6 +226,13 @@ const AddRestaurant = () => {
             placeholder="(555) 123-4567"
           />
         </div>
+
+        <PhotoUpload
+          onPhotosChange={handlePhotosChange}
+          maxPhotos={8}
+          initialPhotos={formData.photoUrls}
+          uploadEndpoint="/api/uploads/restaurant-photos"
+        />
 
         <div className="flex items-center justify-between pt-6">
           <button
