@@ -20,7 +20,7 @@ Built with **Java Spring Boot (backend)**, **React (frontend)**, and **MongoDB (
 
 ### **Frontend**
 - React (Create React App / Vite)
-- Bootstrap / TailwindCSS (depending on setup)
+- TailwindCSS
 
 ### **Backend**
 - Java Spring Boot
